@@ -101,6 +101,8 @@ func run(p *parameter) {
 		fmt.Println("The command is intended to work with pipes.")
 		fmt.Println("Usage:")
 		fmt.Println("bjobs -W | sofa --platform=LSF --command=bjobs --tid=001")
+		fmt.Println("or")
+		fmt.Println("sofa exec 'bjobs -W' --platform=LSF --command=bjobs --tid=001")
 		os.Exit(1)
 	}
 
