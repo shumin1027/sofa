@@ -9,6 +9,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"strings"
 	"time"
 	"xtc/sofa/connect"
 	"xtc/sofa/model"
@@ -78,8 +79,9 @@ func handleConnection(conn *net.UnixConn) {
 	// json 编码
 	bjson, err := json.Marshal(result)
 
+	// 存入redis
 	redis := connect.RedisClient();
-	redis.LPush(result.TID, string(bjson))
+	redis.LPush(strings.ToLower(result.Platform+"-"+result.Command), bjson)
 
 	fmt.Printf("%+v\tReceived from client: [%s]\n", time.Now(), string(bjson))
 
