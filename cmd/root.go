@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"os"
+	"os/user"
 	"time"
 	"xtc/sofa/model"
 	"xtc/sofa/pkg/socket/client"
@@ -95,6 +96,18 @@ func init() {
 
 // 从 管道 接受输入
 func run(p *parameter) {
+
+	// 当前linux用户
+	u, _ := user.Current()
+
+	call := new(model.Call)
+	call.TID = p.tid
+	call.Platform = p.platform
+	call.Command = p.command
+	call.User = u.Username
+	call.Time = time.Now()
+	call.Stdout = make([]string, 0, 10)
+
 	info, _ := os.Stdin.Stat()
 
 	if (info.Mode() & os.ModeCharDevice) == os.ModeCharDevice {
@@ -105,13 +118,6 @@ func run(p *parameter) {
 		fmt.Println("sofa exec 'bjobs -W' --platform=LSF --command=bjobs --tid=001")
 		os.Exit(1)
 	}
-
-	call := new(model.Call)
-	call.TID = p.tid
-	call.Platform = p.platform
-	call.Command = p.command
-	call.Time = time.Now()
-	call.Stdout = make([]string, 0, 10)
 
 	s := bufio.NewScanner(os.Stdin)
 

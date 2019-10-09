@@ -21,6 +21,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"github.com/bitfield/script"
+	"os/user"
 	"time"
 	"xtc/sofa/model"
 	"xtc/sofa/pkg/socket/client"
@@ -76,8 +77,20 @@ func init() {
 // 执行 cmd 命令 作为输入
 func exec(p *parameter, cmd string) {
 
+	// 当前linux用户
+	u, _ := user.Current()
+
+	call := new(model.Call)
+	call.TID = p.tid
+	call.Platform = p.platform
+	call.Command = p.command
+	call.Time = time.Now()
+	call.Stdout = make([]string, 0, 10)
+	call.User = u.Username
+
 	if p.user != "" {
 		cmd = fmt.Sprintf("su %s -c '%s' ", p.user, cmd)
+		call.User = p.user
 	}
 
 	pipe := script.Exec(cmd)
@@ -86,14 +99,7 @@ func exec(p *parameter, cmd string) {
 	if exit != 0 {
 
 	}
-
-	call := new(model.Call)
-	call.TID = p.tid
-	call.Platform = p.platform
-	call.Command = p.command
-	call.Time = time.Now()
 	call.ExitStatus = exit
-	call.Stdout = make([]string, 0, 10)
 
 	scanner := bufio.NewScanner(pipe.Reader)
 
