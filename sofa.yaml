@@ -1,16 +1,4 @@
 ---
-log:
-  level: debug
-  encoding: json
-  outputPaths:
-    - stdout
-    - /tmp/logs
-  errorOutputPaths:
-    - stderr
-  encoderConfig:
-    messageKey: message
-    levelKey: level
-    levelEncoder: lowercase
 redis:
   address:
     - 'localhost:6379'
