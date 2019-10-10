@@ -1,11 +1,15 @@
 # sofa
 
 ## build
+
 ```shell script
- go build -mod=vendor -o ./bin/sofa 
+ make clean && make build 
 ```
+or
 
-
+```shell script
+ go build -o ./bin/sofa ./main.go
+```
 
 ## Usage
 

@@ -27,6 +27,7 @@ import (
 	"xtc/sofa/log"
 	"xtc/sofa/model"
 	"xtc/sofa/pkg/socket/client"
+	"xtc/sofa/pkg/version"
 )
 
 var cfgFile string
@@ -91,6 +92,7 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.AddCommand(version.Command())
 	rootCmd.Flags().StringP("tid", "t", "", "TraceId,用于跟踪任务执行")
 	rootCmd.Flags().StringP("platform", "p", "SLURM", "作业调度平台：LSF/SLURM")
 	rootCmd.Flags().StringP("command", "c", "", "执行的命令,如：bjobs")
