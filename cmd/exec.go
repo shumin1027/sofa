@@ -20,10 +20,12 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"github.com/bitfield/script"
+	"log"
+	"os"
 	"os/user"
 	"time"
 	"xtc/sofa/model"
+	"xtc/sofa/pkg/shell"
 	"xtc/sofa/pkg/socket/client"
 
 	"github.com/spf13/cobra"
@@ -89,11 +91,17 @@ func exec(p *parameter, cmd string) {
 	call.User = u.Username
 
 	if p.user != "" {
+		// 查询用户 dalgurak
+		us, _ := user.Lookup(p.user)
+		if us == nil {
+			log.Println("用户不存在！")
+			os.Exit(1)
+		}
 		cmd = fmt.Sprintf("su %s -c '%s' ", p.user, cmd)
 		call.User = p.user
 	}
 
-	pipe := script.Exec(cmd)
+	pipe := shell.Exec(cmd)
 
 	exit := pipe.ExitStatus()
 	if exit != 0 {
