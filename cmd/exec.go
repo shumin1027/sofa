@@ -16,17 +16,14 @@ limitations under the License.
 package cmd
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/gob"
 	"fmt"
 	"github.com/pkg/errors"
-	"os"
 	"os/user"
 	"time"
 	. "xtc/sofa/log"
 	"xtc/sofa/model"
-	"xtc/sofa/pkg/shell"
 	"xtc/sofa/pkg/socket/client"
 
 	"github.com/spf13/cobra"
@@ -97,39 +94,16 @@ func exec(p *parameter, cmd string) error {
 	call.TID = p.tid
 	call.Platform = p.platform
 	call.Command = p.command
-	call.Time = time.Now()
+	call.FullCommand = cmd
+	call.SubmitTime = time.Now()
 	call.Stdout = make([]string, 0, 10)
 	call.Username = u.Username
 
-	if p.username != "" {
-		us, err := user.Lookup(p.username)
-
-		if err != nil {
-			return errors.Wrapf(err, "lookup user: %s failed！", p.username)
-		}
-
-		if us == nil {
-			return errors.Wrap(err, "get current user failed！")
-			os.Exit(1)
-		}
-		cmd = fmt.Sprintf("su %s -c '%s'", p.username, cmd)
+	if len(p.username) > 0 {
 		call.Username = p.username
 	}
 
-	pipe := shell.Exec(cmd)
-
-	exit := pipe.ExitStatus()
-	if exit != 0 {
-
-	}
-	call.ExitStatus = exit
-
-	scanner := bufio.NewScanner(pipe.Reader)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		call.Stdout = append(call.Stdout, line)
-	}
+	call.Exec()
 
 	// 序列化
 	var datas bytes.Buffer

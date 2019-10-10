@@ -23,6 +23,7 @@ import (
 	"xtc/sofa/connect"
 	. "xtc/sofa/log"
 	"xtc/sofa/pkg/socket/server"
+	"xtc/sofa/pkg/taskmgr"
 )
 
 // serverCmd represents the server command
@@ -44,7 +45,7 @@ var serverCmd = &cobra.Command{
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		//Logger.Info("server is starting……")
-		server.Start()
+		start()
 	},
 }
 
@@ -78,4 +79,17 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		//Logger.Info("using config file:" + viper.ConfigFileUsed())
 	}
+}
+
+// 启动服务
+func start() {
+
+	// 启动 redis 监听
+	go taskmgr.Start()
+
+	// 启动 unix 监听
+	go server.Start()
+
+	select {}
+
 }

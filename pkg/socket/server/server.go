@@ -4,16 +4,14 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
-	"encoding/json"
 	"go.uber.org/zap"
 	"io"
 	"net"
 	"os"
-	"strings"
 	"time"
-	"xtc/sofa/connect"
 	. "xtc/sofa/log"
 	"xtc/sofa/model"
+	"xtc/sofa/pkg/store"
 )
 
 const (
@@ -74,23 +72,12 @@ func handleConnection(conn *net.UnixConn) {
 	}
 
 	// 反序列化
-	var result model.Call
+	var call model.Call
 	decoder := gob.NewDecoder(bytes.NewReader(data))
-	decoder.Decode(&result)
+	decoder.Decode(&call)
 
-	// json 编码
-	j, err := json.Marshal(result)
-	if err != nil {
-		Logger.Error("marshal json error", zap.Error(err))
-	}
-
-	Logger.Info("received from client", zap.String("data", string(j)))
-
-	// 存入redis
-	redis := connect.RedisClient();
-	redis.LPush(strings.ToLower(result.Platform+"-"+result.Command), j)
-
-	Logger.Info("push to redis successed")
+	// 存储到 redis 交给 logstash 处理
+	store.Save(&call)
 
 	// Send back response
 	sendResponse(conn, []byte(time.Now().String()))

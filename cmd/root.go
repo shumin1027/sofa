@@ -33,10 +33,10 @@ var cfgFile string
 
 // 执行参数
 type parameter struct {
-	tid      string; // TraceId,用于跟踪任务执行
-	platform string; // 作业调度平台：LSF/SLURM
-	command  string; // 执行的命令,如：bjobs
-	username string; // 执行的命令的用户,如：root
+	tid      string // TraceId,用于跟踪任务执行
+	platform string // 作业调度平台：LSF/SLURM
+	command  string // 执行的命令,如：bjobs
+	username string // 执行的命令的用户,如：root
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -57,7 +57,6 @@ to quickly create a Cobra application.`,
 	},
 
 	Run: func(cmd *cobra.Command, args []string) {
-
 		// 初始化参数
 		p := new(parameter)
 
@@ -108,7 +107,7 @@ func run(p *parameter) {
 	call.Platform = p.platform
 	call.Command = p.command
 	call.Username = u.Username
-	call.Time = time.Now()
+	call.EndTime = time.Now()
 	call.Stdout = make([]string, 0, 10)
 
 	info, _ := os.Stdin.Stat()
