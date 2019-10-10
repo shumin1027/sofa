@@ -26,14 +26,11 @@
 
 ## build
 
-```shell script
- make clean && make build 
-```
+    make clean && make build 
+
 or
 
-```shell script
- go build -o ./bin/sofa ./main.go
-```
+    go build -o ./bin/sofa ./main.go
 
 ## 
 
