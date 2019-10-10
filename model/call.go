@@ -17,7 +17,7 @@ type Call struct {
 	// 命令执行结果：标准错误输出
 	Stderr []string `json:"Stderr" gorm:"column:stderr"`
 	// 执行命令的linux用户
-	User string `json:"User" gorm:"column:user"`
+	Username string `json:"Username" gorm:"column:username"`
 	// 执行完成时间
 	Time time.Time `json:"Time" gorm:"column:time"`
 }

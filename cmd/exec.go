@@ -20,10 +20,11 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"log"
+	"github.com/pkg/errors"
 	"os"
 	"os/user"
 	"time"
+	. "xtc/sofa/log"
 	"xtc/sofa/model"
 	"xtc/sofa/pkg/shell"
 	"xtc/sofa/pkg/socket/client"
@@ -36,6 +37,10 @@ var execCmd = &cobra.Command{
 	Use:   "exec COMMAND",
 	Short: "执行一条Shell命令，将命令输出结果作为输入",
 	Long:  `执行一条Shell命令，将命令输出结果作为输入`,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		// 初始化日志配置
+		InitLogger("agent")
+	},
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// 初始化参数
@@ -55,10 +60,10 @@ var execCmd = &cobra.Command{
 		}
 		p.command = command
 
-		user, err := cmd.Flags().GetString("user")
+		username, err := cmd.Flags().GetString("username")
 		if err != nil {
 		}
-		p.user = user
+		p.username = username
 
 		if len(args) != 1 {
 			fmt.Println("exec needs one command")
@@ -73,14 +78,20 @@ func init() {
 	execCmd.Flags().StringP("tid", "t", "", "TraceId,用于跟踪任务执行")
 	execCmd.Flags().StringP("platform", "p", "SLURM", "作业调度平台：LSF/SLURM")
 	execCmd.Flags().StringP("command", "c", "", "执行的命令,如：bjobs")
-	execCmd.Flags().StringP("user", "u", "", "运行命令使用的Linux账户")
+	execCmd.Flags().StringP("username", "u", "", "运行命令使用的Linux用户")
 }
 
 // 执行 cmd 命令 作为输入
-func exec(p *parameter, cmd string) {
+func exec(p *parameter, cmd string) error {
+
+	Logger.Info("exec:" + cmd)
 
 	// 当前linux用户
-	u, _ := user.Current()
+	u, err := user.Current()
+
+	if err != nil {
+		return errors.Wrap(err, "get current user failed！")
+	}
 
 	call := new(model.Call)
 	call.TID = p.tid
@@ -88,17 +99,21 @@ func exec(p *parameter, cmd string) {
 	call.Command = p.command
 	call.Time = time.Now()
 	call.Stdout = make([]string, 0, 10)
-	call.User = u.Username
+	call.Username = u.Username
 
-	if p.user != "" {
-		// 查询用户 dalgurak
-		us, _ := user.Lookup(p.user)
+	if p.username != "" {
+		us, err := user.Lookup(p.username)
+
+		if err != nil {
+			return errors.Wrapf(err, "lookup user: %s failed！", p.username)
+		}
+
 		if us == nil {
-			log.Println("用户不存在！")
+			return errors.Wrap(err, "get current user failed！")
 			os.Exit(1)
 		}
-		cmd = fmt.Sprintf("su %s -c '%s' ", p.user, cmd)
-		call.User = p.user
+		cmd = fmt.Sprintf("su %s -c '%s'", p.username, cmd)
+		call.Username = p.username
 	}
 
 	pipe := shell.Exec(cmd)
@@ -124,4 +139,5 @@ func exec(p *parameter, cmd string) {
 	// 使用 unix socket 发送给 server 处理
 	client.SentWithBytes(datas.Bytes())
 
+	return nil
 }

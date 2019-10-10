@@ -16,12 +16,12 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"os"
 	"xtc/sofa/connect"
+	. "xtc/sofa/log"
 	"xtc/sofa/pkg/socket/server"
 )
 
@@ -31,6 +31,8 @@ var serverCmd = &cobra.Command{
 	Short: "启动一个server进程，通过Unix Socket来获取sofa收集到到数据,然后转发到Redis",
 	Long:  `启动一个server进程，通过Unix Socket来获取sofa收集到到数据,然后转发到Redis`,
 	PreRun: func(cmd *cobra.Command, args []string) {
+		// 初始化日志配置
+		InitLogger("server")
 		// init redis
 		address := viper.GetStringSlice("redis.address")
 		db := viper.GetInt("redis.db")
@@ -41,7 +43,7 @@ var serverCmd = &cobra.Command{
 		connect.InitRedis(rconfg)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("server is starting……")
+		//Logger.Info("server is starting……")
 		server.Start()
 	},
 }
@@ -61,7 +63,7 @@ func initConfig() {
 		// Find home directory.
 		home, err := homedir.Dir()
 		if err != nil {
-			fmt.Println(err)
+			//Logger.Error("find home directory error")
 			os.Exit(1)
 		}
 
@@ -74,6 +76,6 @@ func initConfig() {
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
+		//Logger.Info("using config file:" + viper.ConfigFileUsed())
 	}
 }

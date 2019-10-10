@@ -24,6 +24,7 @@ import (
 	"os"
 	"os/user"
 	"time"
+	"xtc/sofa/log"
 	"xtc/sofa/model"
 	"xtc/sofa/pkg/socket/client"
 )
@@ -35,7 +36,7 @@ type parameter struct {
 	tid      string; // TraceId,用于跟踪任务执行
 	platform string; // 作业调度平台：LSF/SLURM
 	command  string; // 执行的命令,如：bjobs
-	user     string; // 执行的命令的用户,如：root
+	username string; // 执行的命令的用户,如：root
 }
 
 // rootCmd represents the base command when called without any subcommands
@@ -50,6 +51,10 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
+	PreRun: func(cmd *cobra.Command, args []string) {
+		// 初始化日志配置
+		log.InitLogger("agent")
+	},
 
 	Run: func(cmd *cobra.Command, args []string) {
 
@@ -87,11 +92,9 @@ func Execute() {
 }
 
 func init() {
-
 	rootCmd.Flags().StringP("tid", "t", "", "TraceId,用于跟踪任务执行")
 	rootCmd.Flags().StringP("platform", "p", "SLURM", "作业调度平台：LSF/SLURM")
 	rootCmd.Flags().StringP("command", "c", "", "执行的命令,如：bjobs")
-
 }
 
 // 从 管道 接受输入
@@ -104,7 +107,7 @@ func run(p *parameter) {
 	call.TID = p.tid
 	call.Platform = p.platform
 	call.Command = p.command
-	call.User = u.Username
+	call.Username = u.Username
 	call.Time = time.Now()
 	call.Stdout = make([]string, 0, 10)
 

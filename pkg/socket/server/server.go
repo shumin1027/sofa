@@ -5,13 +5,14 @@ import (
 	"encoding/binary"
 	"encoding/gob"
 	"encoding/json"
-	"fmt"
+	"go.uber.org/zap"
 	"io"
 	"net"
 	"os"
 	"strings"
 	"time"
 	"xtc/sofa/connect"
+	. "xtc/sofa/log"
 	"xtc/sofa/model"
 )
 
@@ -25,26 +26,27 @@ func Start() {
 	// Get unix socket address based on file path
 	uaddr, err := net.ResolveUnixAddr("unix", UNIX_SOCK_PIPE_PATH)
 	if err != nil {
-		fmt.Println(err)
-		return
+		Logger.Error("resolve unix addr error", zap.Error(err))
+		os.Exit(1)
 	}
 
 	// Listen on the address
 	unixListener, err := net.ListenUnix("unix", uaddr)
 	if err != nil {
-		fmt.Println(err)
-		return
+		Logger.Error("listen on the address error", zap.Error(err))
+		os.Exit(1)
 	}
 
 	// Close listener when close this function, you can also emit it because this function will not terminate gracefully
 	defer unixListener.Close()
 
-	fmt.Println("Waiting for asking questions ...")
+	Logger.Info("server start successed")
+
 	// Monitor request and process
 	for {
 		uconn, err := unixListener.AcceptUnix()
 		if err != nil {
-			fmt.Println(err)
+			Logger.Error("accepts the request error", zap.Error(err))
 			continue
 		}
 
@@ -67,7 +69,7 @@ func handleConnection(conn *net.UnixConn) {
 	data, err := parseRequest(conn)
 
 	if err != nil {
-		fmt.Println(err)
+		Logger.Error("read the request data error", zap.Error(err))
 		return
 	}
 
@@ -77,13 +79,18 @@ func handleConnection(conn *net.UnixConn) {
 	decoder.Decode(&result)
 
 	// json 编码
-	bjson, err := json.Marshal(result)
+	j, err := json.Marshal(result)
+	if err != nil {
+		Logger.Error("marshal json error", zap.Error(err))
+	}
+
+	Logger.Info("received from client", zap.String("data", string(j)))
 
 	// 存入redis
 	redis := connect.RedisClient();
-	redis.LPush(strings.ToLower(result.Platform+"-"+result.Command), bjson)
+	redis.LPush(strings.ToLower(result.Platform+"-"+result.Command), j)
 
-	fmt.Printf("%+v\tReceived from client: [%s]\n", time.Now(), string(bjson))
+	Logger.Info("push to redis successed")
 
 	// Send back response
 	sendResponse(conn, []byte(time.Now().String()))
