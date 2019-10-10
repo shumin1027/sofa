@@ -3,7 +3,6 @@ package tests
 import (
 	"encoding/json"
 	"fmt"
-	"os/user"
 	"testing"
 	"time"
 	"xtc/sofa/model"
@@ -31,14 +30,11 @@ type Call struct {
 
 func TestMarshal(t *testing.T) {
 
-	u, _ := user.Current()
 	call := new(model.Call)
 	call.TID = "001"
 	call.Platform = "docker"
 	call.Command = "docker ps"
-	call.Time = time.Now()
 	call.Stdout = make([]string, 0, 10)
-	call.User = u.Username
 
 	line := `"docker-entrypoint.s…"`
 

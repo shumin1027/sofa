@@ -17,11 +17,6 @@ package main
 
 import "xtc/sofa/cmd"
 
-var (
-	AppVersion string
-	BuildTime  string
-)
-
 func main() {
 	cmd.Execute()
 }
