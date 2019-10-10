@@ -45,14 +45,16 @@ func (call *Call) Exec() {
 
 	cmd := call.FullCommand
 
-	if len(call.Username) > 0 {
+	// 当前linux用户
+	u, err := user.Current()
+
+	if err != nil {
+		log.Logger.Error("get current user failed", zap.Error(err))
+	}
+
+	if len(call.Username) > 0 && call.Username != u.Username {
 		cmd = fmt.Sprintf("su %s -c '%s'", call.Username, cmd)
 	} else {
-		// 当前linux用户
-		u, err := user.Current()
-		if err != nil {
-			log.Logger.Error("get current user failed！", zap.Error(err))
-		}
 		call.Username = u.Username
 	}
 

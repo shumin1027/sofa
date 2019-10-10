@@ -19,8 +19,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"github.com/pkg/errors"
-	"os/user"
 	"time"
 	. "xtc/sofa/log"
 	"xtc/sofa/model"
@@ -83,13 +81,6 @@ func exec(p *parameter, cmd string) error {
 
 	Logger.Info("exec:" + cmd)
 
-	// 当前linux用户
-	u, err := user.Current()
-
-	if err != nil {
-		return errors.Wrap(err, "get current user failed！")
-	}
-
 	call := new(model.Call)
 	call.TID = p.tid
 	call.Platform = p.platform
@@ -97,7 +88,6 @@ func exec(p *parameter, cmd string) error {
 	call.FullCommand = cmd
 	call.SubmitTime = time.Now()
 	call.Stdout = make([]string, 0, 10)
-	call.Username = u.Username
 
 	if len(p.username) > 0 {
 		call.Username = p.username
