@@ -73,3 +73,24 @@ or
     
     lpush calls "{\"TID\":\"001\",\"Platform\":\"docker\",\"Command\":\"info\",\"FullCommand\":\"docker info\"}"
     
+    
+### 4.处理结果示例：
+
+    {
+    	"TID": "001",
+    	"Platform": "docker",
+    	"Command": "ps",
+    	"FullCommand": "docker ps",
+    	"ExitStatus": 0,
+    	"Stdout": [
+    		"CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                               NAMES",
+    		"44cf62dfc507        redis               \"docker-entrypoint.s…\"   43 seconds ago      Up 41 seconds       0.0.0.0:6379->6379/tcp              redis",
+    		"5765e68f63e1        mysql               \"docker-entrypoint.s…\"   3 months ago        Up 2 days           0.0.0.0:3306->3306/tcp, 33060/tcp   mysql"
+    	],
+    	"Stderr": null,
+    	"Username": "shumin",
+    	"SubmitTime": "2019-10-11T01:16:15.050761+08:00",
+    	"StartTime": "2019-10-11T01:16:15.0509+08:00",
+    	"EndTime": "2019-10-11T01:16:15.134961+08:00"
+    }    
+    
