@@ -1,7 +1,7 @@
 # sofa
 
 `sofa`主要用于执行 `shell` 以及`命令行应用` 并收集其输出结果（Console Stdout）并存储到`Redis`,便于后续处理（Logstash）, 
-弥补`filebeat`只能收集`log`文件，无法收集控制台输出到问题，也可以通过`Redis`任务队列来接受命令执行并处理结果
+弥补`filebeat`只能收集`log`文件，无法收集控制台输出的问题，也可以通过`Redis`任务队列来接受命令执行并处理结果
 
 主要有以下几个命令：
 - `sofa`: 
