@@ -76,7 +76,7 @@ func (call *Call) Exec() {
 	if exit != 0 {
 		for scanner.Scan() {
 			line := scanner.Text()
-			call.Stderr = append(call.Stdout, line)
+			call.Stderr = append(call.Stderr, line)
 		}
 	} else {
 		for scanner.Scan() {

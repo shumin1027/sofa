@@ -76,7 +76,9 @@ func exec(p *parameter, cmd string) error {
 	call.Command = p.command
 	call.FullCommand = cmd
 	call.SubmitTime = time.Now()
+
 	call.Stdout = make([]string, 0, 10)
+	call.Stderr = make([]string, 0, 10)
 
 	if len(p.username) > 0 {
 		call.Username = p.username
