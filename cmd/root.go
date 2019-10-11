@@ -44,7 +44,8 @@ type parameter struct {
 var rootCmd = &cobra.Command{
 	Use:   "sofa",
 	Short: "一个命令行输出前处理工具",
-	Long:  `sofa主要用于执行 shell 以及命令行应用 并收集其输出结果（Console Stdout）并存储到Redis,便于后续处理（Logstash）, 弥补filebeat只能收集log文件，无法收集控制台输出到问题，也可以通过Redis任务队列来接受命令执行并处理结果`,
+	Long: `sofa主要用于执行 shell 以及命令行应用 并收集其输出结果（Console Stdout）并存储到Redis,便于后续处理（Logstash）, 
+			弥补filebeat只能收集log文件，无法收集控制台输出到问题，也可以通过Redis任务队列来接受命令执行并处理结果`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	PreRun: func(cmd *cobra.Command, args []string) {

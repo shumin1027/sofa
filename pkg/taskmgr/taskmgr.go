@@ -2,9 +2,10 @@ package taskmgr
 
 import (
 	"encoding/json"
-	"fmt"
+	"go.uber.org/zap"
 	"time"
 	"xtc/sofa/connect"
+	"xtc/sofa/log"
 	"xtc/sofa/model"
 )
 
@@ -22,8 +23,10 @@ func loop() {
 		err := json.Unmarshal([]byte(msg), &call)
 
 		if err != nil {
-			fmt.Println(err)
+			log.Logger.Error("unmarshal msg err", zap.Error(err))
+			break
 		}
+
 		call.SubmitTime = time.Now()
 
 		go do(&call)
