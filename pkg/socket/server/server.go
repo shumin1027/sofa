@@ -11,7 +11,6 @@ import (
 	"time"
 	. "xtc/sofa/log"
 	"xtc/sofa/model"
-	"xtc/sofa/pkg/store"
 )
 
 const (
@@ -77,7 +76,7 @@ func handleConnection(conn *net.UnixConn) {
 	decoder.Decode(&call)
 
 	// 存储到 redis 交给 logstash 处理
-	store.Save(&call)
+	call.Save()
 
 	// Send back response
 	sendResponse(conn, []byte(time.Now().String()))

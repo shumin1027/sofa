@@ -6,7 +6,6 @@ import (
 	"time"
 	"xtc/sofa/connect"
 	"xtc/sofa/model"
-	"xtc/sofa/pkg/store"
 )
 
 func Start() {
@@ -34,5 +33,5 @@ func loop() {
 
 func do(call *model.Call) {
 	call.Exec()
-	store.Save(call)
+	call.Save()
 }

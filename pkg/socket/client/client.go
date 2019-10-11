@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/gob"
-	"fmt"
+	"github.com/pkg/errors"
+	"go.uber.org/zap"
 	"io"
 	"net"
 	"time"
+	"xtc/sofa/log"
 )
 
 const (
@@ -18,26 +20,24 @@ var (
 	exitSemaphore chan bool
 )
 
-func Sent(msg string) {
+func Sent(msg string) error {
 	var datas bytes.Buffer
 	encoder := gob.NewEncoder(&datas)
 	encoder.Encode(msg)
-	SentWithBytes(datas.Bytes())
+	return SentWithBytes(datas.Bytes())
 }
 
-func SentWithBytes(data []byte) {
+func SentWithBytes(data []byte) error {
 	// Get unix socket address based on file path
 	uaddr, err := net.ResolveUnixAddr("unix", UNIX_SOCK_PIPE_PATH)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return errors.Wrap(err, "resolve unix addr err")
 	}
 
 	// Connect server with unix socket
 	uconn, err := net.DialUnix("unix", nil, uaddr)
 	if err != nil {
-		fmt.Println(err)
-		return
+		return errors.Wrap(err, "connect server with unix socket err")
 	}
 
 	// Close unix socket when exit this function
@@ -52,7 +52,7 @@ func SentWithBytes(data []byte) {
 	_, err = sendRequest(uconn, data)
 
 	if err != nil {
-		fmt.Println("Send Data Error")
+		return errors.Wrap(err, "send data error")
 	}
 
 	// Wait server response
@@ -60,12 +60,14 @@ func SentWithBytes(data []byte) {
 	exitSemaphore = make(chan bool)
 	select {
 	case <-time.After(time.Duration(2) * time.Second):
-		fmt.Println("Wait response timeout")
+		log.Logger.Warn("wait response timeout")
 	case <-exitSemaphore:
-		fmt.Println("Get response correctly")
+		log.Logger.Info("get response correctly")
 	}
 
 	close(exitSemaphore)
+
+	return nil
 }
 
 /*******************************************************
@@ -92,9 +94,9 @@ func onMessageReceived(conn *net.UnixConn) {
 	// Read information from response
 	data, err := parseResponse(conn)
 	if err != nil {
-		fmt.Println(err)
+		log.Logger.Error("read information from response error")
 	} else {
-		fmt.Printf("%v\tReceived from server: %s\n", time.Now(), string(data))
+		log.Logger.Info("received ack from server", zap.String("data", string(data)))
 	}
 
 	// Exit when receive data from server

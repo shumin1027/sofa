@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"go.uber.org/zap"
 	"time"
 	. "xtc/sofa/log"
 	"xtc/sofa/model"
@@ -49,7 +50,10 @@ var execCmd = &cobra.Command{
 			fmt.Println("exec needs one command")
 		}
 
-		exec(p, args[0])
+		err = exec(p, args[0])
+		if err != nil {
+			Logger.Error("exec error", zap.String("command", args[0]), zap.Error(err))
+		}
 	},
 }
 
@@ -64,7 +68,7 @@ func init() {
 // 执行 cmd 命令 作为输入
 func exec(p *parameter, cmd string) error {
 
-	Logger.Info("exec:" + cmd)
+	Logger.Info("exec command", zap.String("command", cmd))
 
 	call := new(model.Call)
 	call.TID = p.tid
@@ -86,7 +90,5 @@ func exec(p *parameter, cmd string) error {
 	encoder.Encode(call)
 
 	// 使用 unix socket 发送给 server 处理
-	client.SentWithBytes(datas.Bytes())
-
-	return nil
+	return client.SentWithBytes(datas.Bytes())
 }

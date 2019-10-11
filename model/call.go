@@ -2,10 +2,13 @@ package model
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"go.uber.org/zap"
 	"os/user"
+	"strings"
 	"time"
+	"xtc/sofa/connect"
 	"xtc/sofa/log"
 	"xtc/sofa/pkg/shell"
 )
@@ -62,15 +65,41 @@ func (call *Call) Exec() {
 	pipe := shell.Exec(cmd)
 	call.EndTime = time.Now()
 
-	exit := pipe.ExitStatus()
-	if exit != 0 {
+	if pipe.Error() != nil {
+		log.Logger.Error("exec error", zap.String("command", cmd), zap.Error(pipe.Error()))
 	}
+
+	exit := pipe.ExitStatus()
 	call.ExitStatus = exit
 
 	scanner := bufio.NewScanner(pipe.Reader)
-	for scanner.Scan() {
-		line := scanner.Text()
-		call.Stdout = append(call.Stdout, line)
+	if exit != 0 {
+		for scanner.Scan() {
+			line := scanner.Text()
+			call.Stderr = append(call.Stdout, line)
+		}
+	} else {
+		for scanner.Scan() {
+			line := scanner.Text()
+			call.Stdout = append(call.Stdout, line)
+		}
 	}
+
+}
+
+/*
+存储到Redis
+*/
+func (call *Call) Save() {
+	// json 编码
+	j, err := json.Marshal(call)
+	if err != nil {
+		log.Logger.Error("marshal json error", zap.Error(err))
+	}
+
+	// 存入redis给logstash继续处理
+	redis := connect.RedisClient()
+	redis.LPush(strings.ToLower(call.Platform+"-"+call.Command), j)
+	log.Logger.Info("push to redis successed")
 
 }

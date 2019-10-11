@@ -43,13 +43,8 @@ type parameter struct {
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "sofa",
-	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "一个命令行输出前处理工具",
+	Long:  `sofa主要用于执行 shell 以及命令行应用 并收集其输出结果（Console Stdout）并存储到Redis,便于后续处理（Logstash）, 弥补filebeat只能收集log文件，无法收集控制台输出到问题，也可以通过Redis任务队列来接受命令执行并处理结果`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	PreRun: func(cmd *cobra.Command, args []string) {
