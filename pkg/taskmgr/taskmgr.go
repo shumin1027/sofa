@@ -17,6 +17,7 @@ func Start() {
 func loop() {
 	for {
 		// timeout 0s
+
 		msg := connect.RedisClient().BRPop(0*1000*1000*1000, "calls").Val()[1]
 
 		var call model.Call
@@ -24,7 +25,7 @@ func loop() {
 
 		if err != nil {
 			log.Logger.Error("unmarshal msg err", zap.Error(err))
-			break
+			continue
 		}
 
 		call.SubmitTime = time.Now()
